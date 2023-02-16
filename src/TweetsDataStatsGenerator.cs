@@ -13,7 +13,7 @@ namespace CodeScreen.Assessments.TweetsApi
     class TweetDataStatsGenerator
     {
         private readonly TweetsApiService TweetsApiService;
-        private List<dynamic> _tweetResults;
+        private List<TweetData> _tweetResults;
 
         public TweetDataStatsGenerator(TweetsApiService tweetsApiService) {
             TweetsApiService = tweetsApiService;
@@ -34,7 +34,7 @@ namespace CodeScreen.Assessments.TweetsApi
                 _tweetResults = TweetsApiService.GetTweets("joe_smith");
             }
             if (_tweetResults.Count == 0) return 0;
-            int maxnumber = _tweetResults.GroupBy(x => x["createdAt"].Value.DayOfYear)
+            int maxnumber = _tweetResults.GroupBy(x => x.createdAt.DayOfYear)
                     .Select(x => new { Key = x.Key, count = x.Count() })
                     .Max(x => x.count);
             return maxnumber;
@@ -56,9 +56,9 @@ namespace CodeScreen.Assessments.TweetsApi
             }
             if (_tweetResults.Count == 0) return null;
 
-            var maxlength = _tweetResults.Max(x => x["text"].Value.ToString().Length);
-            var longest = _tweetResults.Where(x => x["text"].Value.ToString().Length == maxlength).First();
-            return longest["id"].Value.ToString();
+            var maxlength = _tweetResults.Max(x => x.text.Length);
+            var longest = _tweetResults.Where(x => x.text.Length == maxlength).First();
+            return longest.id;
         }
 
         /**
@@ -77,9 +77,9 @@ namespace CodeScreen.Assessments.TweetsApi
                 _tweetResults = TweetsApiService.GetTweets("joe_smith");
             }
             if (_tweetResults.Count == 0) return 0;
-            var orderedList = _tweetResults.OrderBy(x => x["createdAt"].Value).ToList();
+            var orderedList = _tweetResults.OrderBy(x => x.createdAt).ToList();
             TimeSpan maxday = Enumerable.Range(1, orderedList.Count - 1)
-                  .Select(i => ((DateTime)orderedList[i]["createdAt"].Value).Subtract(orderedList[i - 1]["createdAt"].Value))
+                  .Select(i => orderedList[i].createdAt.Subtract(orderedList[i - 1].createdAt))
                   .Max();            
 
             return maxday.Days;
@@ -104,7 +104,7 @@ namespace CodeScreen.Assessments.TweetsApi
             var regex = new Regex(@"#\w+");
             //var matches = regex.Matches("test").Select(x => x.Value);
 
-            var hashtags = _tweetResults.Select(x => regex.Matches(x["text"].Value.ToString()))
+            var hashtags = _tweetResults.Select(x => regex.Matches(x.text))
                             .Where(x => x.Count >= 1)
                             .Select(y => y[0].Value)
                             .GroupBy(n => n).Select(x => new { Key = x.Key, count = x.Count() })

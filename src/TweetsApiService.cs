@@ -8,7 +8,18 @@ using Newtonsoft.Json;
 
 namespace CodeScreen.Assessments.TweetsApi
 {
-   
+    public class TweetData
+    {
+        public string id { get; set; }
+        public DateTime createdAt { get; set; }
+        public string text { get; set; }
+        public TweetUser user { get; set; }
+    }
+    public class TweetUser
+    {
+        public string id { get; set; }
+        public string userName { get; set; }
+    }
     /**
     * Service that retrieves data from the CodeScreen Tweets API.
     */
@@ -29,11 +40,9 @@ namespace CodeScreen.Assessments.TweetsApi
          * @param userName the name of the user
          * @return a list containing the data for all tweets for the given user
         */
-        public List<dynamic> GetTweets(string userName) {
-            //TODO Implement
-            //Note that the type of the returned list should be something that better represents tweet data.
-
-            string apiurl = "https://app.codescreen.com/api/assessments/tweets?userName=" + userName;
+        public List<TweetData> GetTweets(string userName) {
+           
+            string apiurl = TweetsEndpointURL + "?userName=" + userName;
             using HttpClient client = new();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ApiToken);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -42,7 +51,7 @@ namespace CodeScreen.Assessments.TweetsApi
             using HttpResponseMessage response = client.Send(req);
             using HttpContent content = response.Content;
             string myContent = content.ReadAsStringAsync().Result;
-            List<dynamic> result = JsonConvert.DeserializeObject<List<dynamic>>(myContent); 
+            List<TweetData> result = JsonConvert.DeserializeObject<List<TweetData>>(myContent); 
             
             return result;
         }
